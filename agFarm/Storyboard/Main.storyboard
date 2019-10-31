@@ -1965,6 +1965,7 @@
                         </rightBarButtonItems>
                     </navigationItem>
                     <connections>
+                        <outlet property="satelliteViewModel" destination="L2Y-0P-u8D" id="VfP-Ia-tsV"/>
                         <outlet property="txtBrightness" destination="WmT-am-ihU" id="WVV-ZP-mdU"/>
                         <outlet property="txtDate" destination="Ibb-o5-hd3" id="IPh-hE-YMu"/>
                         <outlet property="txtFarm" destination="2Bg-r9-Jt1" id="Gov-1d-2d8"/>
@@ -1974,6 +1975,12 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="d6x-my-Naa" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <customObject id="hXZ-n2-w3U" customClass="APIClient" customModule="agFarm" customModuleProvider="target"/>
+                <customObject id="L2Y-0P-u8D" customClass="SatelliteViewModel" customModule="agFarm" customModuleProvider="target">
+                    <connections>
+                        <outlet property="apiClient" destination="hXZ-n2-w3U" id="vlp-Os-Psd"/>
+                    </connections>
+                </customObject>
             </objects>
             <point key="canvasLocation" x="1240.5797101449277" y="2206.79347826087"/>
         </scene>
@@ -4951,10 +4958,12 @@
                         <viewLayoutGuide key="safeArea" id="oqv-aT-POX"/>
                     </view>
                     <connections>
+                        <outlet property="apiClient" destination="KQc-BP-pKT" id="5l0-u8-yI6"/>
                         <outlet property="tableView" destination="b2W-fT-hyz" id="d0L-dn-G4x"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ibc-bh-4tp" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <customObject id="KQc-BP-pKT" customClass="APIClient" customModule="agFarm" customModuleProvider="target"/>
             </objects>
             <point key="canvasLocation" x="2005.7971014492755" y="2242.663043478261"/>
         </scene>

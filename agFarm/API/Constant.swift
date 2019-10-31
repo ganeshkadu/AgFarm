@@ -41,12 +41,15 @@ class Constant {
     
 }
 class Urls {
-
+    
+    static let SATELLITE_BASE_URL = "http://plots.prakshep.com/myplots/"
     static let BASE_URL = "http://192.168.0.52/v2/agfarm/"
     static var GET_SALT =  Urls.BASE_URL + "user/getSalt"
+    static var GET_FARMFIELD =  Urls.BASE_URL + "user/getFarmerFieldDetails"
     static var AUTHENTICATION_USER = Urls.BASE_URL + "user/authenticationUser"
     static var ADD_FARm = Urls.BASE_URL + "saveFarm"
     static let REFDATA =  Urls.BASE_URL + "appdata/getReferenceData"
+    static let FARMDETAILS = Urls.BASE_URL + "User/getFarmerFieldDetails"
 }
 class FontNames {
     

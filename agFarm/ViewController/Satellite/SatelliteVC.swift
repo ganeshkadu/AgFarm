@@ -11,10 +11,14 @@ import GooglePlaces
 import GoogleMaps
 
 class SatelliteVC: UIViewController , UIPickerViewDelegate, UIPickerViewDataSource, UITextFieldDelegate{
-//    @IBOutlet weak var txtSeason: UITextField!
-//    @IBOutlet weak var txtFarm: UITextField!
-//    @IBOutlet weak var txtField: UITextField!
-//    @IBOutlet weak var txtYear: UITextField!
+    //    @IBOutlet weak var txtSeason: UITextField!
+    //    @IBOutlet weak var txtFarm: UITextField!
+    //    @IBOutlet weak var txtField: UITextField!
+    //    @IBOutlet weak var txtYear: UITextField!
+    @IBOutlet weak var customView: UIView!
+    
+    
+    @IBOutlet var satelliteViewModel: SatelliteViewModel!
     var myPickerView : UIPickerView!
     var seasonPickerView : UIPickerView!
     var farmsPickerView : UIPickerView!
@@ -36,7 +40,7 @@ class SatelliteVC: UIViewController , UIPickerViewDelegate, UIPickerViewDataSour
     
     @IBOutlet weak var txtDate: DropDown!
     @IBOutlet weak var txtBrightness: DropDown!
-   
+    
     enum CardState {
         case expanded
         case collapsed
@@ -53,32 +57,212 @@ class SatelliteVC: UIViewController , UIPickerViewDelegate, UIPickerViewDataSour
         return cardVisible ? .collapsed : .expanded
     }
     
+    var mapView: GMSMapView!
+    
     var runningAnimations = [UIViewPropertyAnimator]()
     var animationProgressWhenInterrupted:CGFloat = 0
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        txtBrightness.optionArray = ["Vegetation","Moisture","Brightness"]
+        //
+                let camera = GMSCameraPosition.camera(withLatitude: 36.1254, longitude: -89.6837 , zoom: 16.0)
+                let mapView = GMSMapView.map(withFrame: self.view.bounds, camera: camera)
+                mapView.mapType = .satellite
+                mapView.settings.compassButton = true
+                mapView.settings.myLocationButton = true
+                mapView.settings.zoomGestures = true
+                mapView.setMinZoom(10.0, maxZoom: 18.0)
+                mapView.settings.indoorPicker = true
+                view = mapView
+        
+        //        let camera = GMSCameraPosition.camera(withLatitude: 36.1254, longitude: -89.6837 , zoom: 16.0)
+        //        mapView = GMSMapView.map(withFrame: self.customView.bounds, camera: camera)
+        //
+        //        mapView.mapType = .satellite
+        //        mapView.settings.compassButton = true
+        //        mapView.settings.myLocationButton = true
+        //        mapView.settings.zoomGestures = true
+        //        mapView.setMinZoom(10.0, maxZoom: 18.0)
+        //        mapView.settings.indoorPicker = true
+        //        self.customView.addSubview(mapView)
+        showSpinner()
+        satelliteViewModel.getSatelliteViewJsonUrl(plotID: txtField.text!, date: txtDate.text!, brightnessID: "I001") { (result) in
+            
+            let url = result[0]["index_geojson_url"].stringValue
+            //            let camera = GMSCameraPosition.camera(withLatitude: 36.1254, longitude: -89.6837 , zoom: 16.0)
+            //            let mapView = GMSMapView.map(withFrame: CGRect.zero, camera: camera)
+            //            mapView.mapType = .satellite
+            //            mapView.settings.compassButton = true
+            //            mapView.settings.myLocationButton = true
+            //            mapView.settings.zoomGestures = true
+            //            mapView.setMinZoom(10.0, maxZoom: 18.0)
+            //            mapView.settings.indoorPicker = true
+            //            self.view = mapView
+            self.satelliteViewModel.getPlotView(satelliteURL: url, completion: { (result) in
+                
+                print(result)
+                
+                let features = result["features"].arrayValue
+                
+                
+                for feature in features {
+                    
+                    let properties = feature["properties"].dictionaryValue
+                    let fillColor = properties["fill"]?.stringValue
+                    let geometry = feature["geometry"].dictionaryValue
+                    let coordinates = geometry["coordinates"]?.arrayValue
+                    
+                    let data = coordinates![0].arrayValue
+                    
+                    //self.plotPolygon(fillColor: fillColor, data: data)
+                    
+                    DispatchQueue.main.async {
+                        let rect = GMSMutablePath()
+                        for obj in data
+                        {
+                            print(obj)
+                            let lat = obj[1].doubleValue
+                            let long = obj[0].doubleValue
+                            rect.add(CLLocationCoordinate2D(latitude: lat , longitude: long))
+                            
+                            print("lat = \(lat) and long = \(long)")
+                            
+                        }
+                        
+                        let polygon = GMSPolygon(path: rect)
+                        polygon.fillColor = UIColor(hexString: fillColor!)
+                        polygon.strokeColor = .red
+                        polygon.strokeWidth = 2
+                        polygon.fillColor = UIColor(hexString: fillColor!)
+                        polygon.map = self.mapView
+                        
+                        
+                    }
+                    
+                }
+                DispatchQueue.main.async {
+                    
+                    self.hideSpinner()
+                }
+                
+            })
+            
+        }
+        txtBrightness.optionArray = ["Brightness","Moisture","Vegetation"]
         txtYear.optionArray = ["2015","2016","2017","2018","2019"]
         txtSeason.optionArray =  ["Rabbi","Kharif"]
         txtFarm.optionArray = ["Farm-1" , "Farm-2" , "Farm-3" , "Farm-4", "Farm-5", "Farm-6"]
-//        txtField.optionArray = ["Fiel-1","Field-2","Field-3","Field-4","Field-5","Field-6","Field-7","Field-8"]
+        //        txtField.optionArray = ["Fiel-1","Field-2","Field-3","Field-4","Field-5","Field-6","Field-7","Field-8"]
         
-        for index in 126..<1742 {
+        getJsonUrl(plotID: txtField.text!, date: txtDate.text!, brightnessID: "I001")
+        
+        for index in 126..<133 {
             
             txtField.optionArray.append("Ag_C004_\(index)")
-           // listOFPlotID.append("Ag_C004_\(index)")
+            // listOFPlotID.append("Ag_C004_\(index)")
         }
+        // self.getDateList(plotID:"Ag_C004_126")
         //setupCard()
         print(listOFPlotID)
         
         txtField.didSelect{(selectedText , index , id) in
-           // self.txtPlotID.text = "Selected String: \(selectedText) \n index: \(index) \n Id: \(id)"
+            // self.txtPlotID.text = "Selected String: \(selectedText) \n index: \(index) \n Id: \(id)"
             self.txtField.text = selectedText
-            
-            print("selected Text = \(selectedText)")
+            self.getDateList(plotID: selectedText)
+        }
+        txtBrightness.didSelect{(selectedText , index , id) in
+            // self.txtPlotID.text = "Selected String: \(selectedText) \n index: \(index) \n Id: \(id)"
+            self.txtBrightness.text = selectedText
+            //self.getJsonUrl(plotID: selectedText)
         }
         
+    }
+    fileprivate func getDateList(plotID:String?){
+        if !Connectivity.isConnectedToInternet(){
+            showToast(message: AlerMessage.internetConnection)
+            return
+        }
+        showSpinner()
+        satelliteViewModel.getDateList(plotID: plotID) { (data) in
+            
+            for index in 0..<data.count {
+                print(data.count)
+                
+                print(data[index]["DateofAnalysis"].stringValue)
+                self.txtDate.optionArray.append(data[index]["DateofAnalysis"].stringValue)
+                
+            }
+            self.hideSpinner()
+        }
+    }
+    fileprivate func getJsonUrl(plotID:String?,date:String?,brightnessID: String?){
+        if !Connectivity.isConnectedToInternet(){
+            showToast(message: AlerMessage.internetConnection)
+            return
+        }
+        showSpinner()
+        satelliteViewModel.getSatelliteViewJsonUrl(plotID: plotID, date: date, brightnessID: brightnessID) { (result) in
+            
+            let url = result[0]["index_geojson_url"].stringValue
+            //            let camera = GMSCameraPosition.camera(withLatitude: 36.1254, longitude: -89.6837 , zoom: 16.0)
+            //            let mapView = GMSMapView.map(withFrame: CGRect.zero, camera: camera)
+            //            mapView.mapType = .satellite
+            //            mapView.settings.compassButton = true
+            //            mapView.settings.myLocationButton = true
+            //            mapView.settings.zoomGestures = true
+            //            mapView.setMinZoom(10.0, maxZoom: 18.0)
+            //            mapView.settings.indoorPicker = true
+            //            self.view = mapView
+            self.satelliteViewModel.getPlotView(satelliteURL: url, completion: { (result) in
+                
+                print(result)
+                
+                let features = result["features"].arrayValue
+                
+                
+                for feature in features {
+                    
+                    let properties = feature["properties"].dictionaryValue
+                    let fillColor = properties["fill"]?.stringValue
+                    let geometry = feature["geometry"].dictionaryValue
+                    let coordinates = geometry["coordinates"]?.arrayValue
+                    
+                    let data = coordinates![0].arrayValue
+                    
+                    //self.plotPolygon(fillColor: fillColor, data: data)
+                    
+                    DispatchQueue.main.async {
+                        let rect = GMSMutablePath()
+                        for obj in data
+                        {
+                            print(obj)
+                            let lat = obj[1].doubleValue
+                            let long = obj[0].doubleValue
+                            rect.add(CLLocationCoordinate2D(latitude: lat , longitude: long))
+                            
+                            print("lat = \(lat) and long = \(long)")
+                            
+                        }
+                        
+                        let polygon = GMSPolygon(path: rect)
+                        polygon.fillColor = UIColor(hexString: fillColor!)
+                        polygon.strokeColor = .red
+                        polygon.strokeWidth = 2
+                        polygon.fillColor = UIColor(hexString: fillColor!)
+                        // polygon.map =
+                        
+                        
+                    }
+                    
+                }
+                DispatchQueue.main.async {
+                    
+                    self.hideSpinner()
+                }
+                
+            })
+            
+        }
     }
     
     fileprivate func initializeGoogleMap(){
@@ -107,7 +291,7 @@ class SatelliteVC: UIViewController , UIPickerViewDelegate, UIPickerViewDataSour
     }
     func yearsPickUp(_ textField : UITextField){
         
-       
+        
         // UIPickerView
         self.myPickerView = UIPickerView(frame:CGRect(x: 0, y: 0, width: self.view.frame.size.width, height: 216))
         self.myPickerView.delegate = self
@@ -215,7 +399,7 @@ class SatelliteVC: UIViewController , UIPickerViewDelegate, UIPickerViewDataSour
         return 1
     }
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-       
+        
         var countrows : Int = years.count
         if pickerView == myPickerView {
             countrows = years.count
@@ -228,18 +412,18 @@ class SatelliteVC: UIViewController , UIPickerViewDelegate, UIPickerViewDataSour
         }
         
         return countrows
-     }
+    }
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         
         if pickerView == myPickerView {
-           return years[row]
+            return years[row]
             
         } else if pickerView == seasonPickerView {
-          return seaasons[row]
+            return seaasons[row]
         }else if pickerView == farmsPickerView {
-           return farms[row]
+            return farms[row]
         }else if pickerView == fieldPickerView {
-           return fields[row]
+            return fields[row]
         }
         
         return ""
@@ -255,36 +439,36 @@ class SatelliteVC: UIViewController , UIPickerViewDelegate, UIPickerViewDataSour
         } else if pickerView == fieldPickerView {
             self.txtField.text = fields[row]
         }
-
+        
     }
     //MARK:- TextFiled Delegate
     func textFieldDidBeginEditing(_ textField: UITextField) {
         
-//        if textField == txtYear {
-//              self.yearsPickUp(txtYear)
-//            return
-//        }
-//        if textField == txtSeason {
-//            self.seasonPickUp(txtSeason)
-//            return
-//        }
-//        if textField == txtFarm {
-//            self.farmPickUp(txtFarm)
-//            return
-//        }
-//        if textField == txtField {
-//            self.fieldPickUp(txtField)
-//            return
-//        }
-      
+        //        if textField == txtYear {
+        //              self.yearsPickUp(txtYear)
+        //            return
+        //        }
+        //        if textField == txtSeason {
+        //            self.seasonPickUp(txtSeason)
+        //            return
+        //        }
+        //        if textField == txtFarm {
+        //            self.farmPickUp(txtFarm)
+        //            return
+        //        }
+        //        if textField == txtField {
+        //            self.fieldPickUp(txtField)
+        //            return
+        //        }
+        
     }
     
     //MARK:- Button
     @objc func doneClick() {
-         txtYear.resignFirstResponder()
-         txtSeason.resignFirstResponder()
-         txtFarm.resignFirstResponder()
-         txtField.resignFirstResponder()
+        txtYear.resignFirstResponder()
+        txtSeason.resignFirstResponder()
+        txtFarm.resignFirstResponder()
+        txtField.resignFirstResponder()
     }
     @objc func cancelClick() {
         txtYear.resignFirstResponder()
@@ -297,7 +481,7 @@ class SatelliteVC: UIViewController , UIPickerViewDelegate, UIPickerViewDataSour
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     // bottom animation view
     
     func setupCard() {
@@ -418,6 +602,6 @@ class SatelliteVC: UIViewController , UIPickerViewDelegate, UIPickerViewDataSour
             animator.continueAnimation(withTimingParameters: nil, durationFactor: 0)
         }
     }
-
-
+    
+    
 }

@@ -98,6 +98,7 @@ class APIClient: NSObject{
             }
         }
     }
+    
     func getSecreatUserKey(username: String, completion: @escaping (NSDictionary?,Error?) -> ()  ) {
         
         let headers: HTTPHeaders = [
@@ -121,6 +122,36 @@ class APIClient: NSObject{
                 return
             case .failure(let error):
                
+                completion(nil,error)
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    
+    func getFarmFieldList(farmerId: String, completion: @escaping (JSON?,Error?) -> ()  ) {
+        
+        let headers: HTTPHeaders = [
+            "Authorization": "Basic ODkwNTk4Nzg5OTorR0pJT3p4MXQ4ekR0U1NldGNQS3pCOVFLWFpEcTNjbzNGTFl3dmtON3R3PQ=="
+        ]
+        
+        
+        let url = Urls.GET_FARMFIELD
+        
+        print(url)
+        let param = ["farmerId": farmerId] as [String : Any]
+        
+        //throw APIException.apiFailed(errMsg: "Something went wrong!")
+        Alamofire.request(url, method:.post, parameters: param, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+            switch response.result {
+                
+            case .success:
+                print("response.result.value = \(response.result.value!)")
+                let json =  JSON(response.result.value!)
+                completion(json,nil)
+                return
+            case .failure(let error):
+                
                 completion(nil,error)
                 print(error.localizedDescription)
             }
@@ -151,5 +182,100 @@ class APIClient: NSObject{
             }
         }
     }
+    
+    
+    
+    
+    func fetchDate(plotID:String, completion: @escaping (JSON?,Error?) -> ()  ) {
+        
+        
+        let url = Urls.SATELLITE_BASE_URL + "datelist_agreeta?plotID=\(plotID)&seasonID=A2019"
+        
+        Alamofire.request(url, method:.post, parameters: nil, encoding: JSONEncoding.default, headers: nil).responseJSON { response in
+            switch response.result {
+                
+            case .success:
+                print("response.result.value = \(response.result.value!)")
+                let json =  JSON(response.result.value!)
+                
+                completion(json,nil)
+                return
+            case .failure(let error):
+                
+                completion(nil,error)
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    func getSatelliteJsonUrl(plotID:String,date:String,brightnessID: String, completion: @escaping (JSON?,Error?) -> ()  ) {
+        
+        let url = "http://plots.prakshep.com/myplots/geojsonview_agreeta/?plotID=\(plotID)&seasonID=A2019&DateofAnalysis=\(date)&index=\(brightnessID)"
+        
+        print("URL = \(url)")
+        Alamofire.request(url, method:.get, parameters: nil, encoding: JSONEncoding.default, headers: nil).responseJSON { response in
+            switch response.result {
+                
+            case .success:
+                print("response.result.value = \(response.result.value!)")
+                let json =  JSON(response.result.value!)
+                
+                completion(json,nil)
+                return
+            case .failure(let error):
+                
+                completion(nil,error)
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+    func getSatellitePlot(satelliteURL:String, completion: @escaping (JSON?,Error?) -> ()  ) {
+        
+        
+        Alamofire.request(satelliteURL, method:.get, parameters: nil, encoding: JSONEncoding.default, headers: nil).responseJSON { response in
+            switch response.result {
+                
+            case .success:
+                print("response.result.value = \(response.result.value!)")
+                let json =  JSON(response.result.value!)
+                
+                completion(json,nil)
+                return
+            case .failure(let error):
+                
+                completion(nil,error)
+                print(error.localizedDescription)
+            }
+        }
+    }
+    
+        func getFarm(completion: @escaping (JSON?,Error?) -> ()  ) {
+            let headers: HTTPHeaders = [
+                "Authorization": "Basic ODkwNTk4Nzg5OTorR0pJT3p4MXQ4ekR0U1NldGNQS3pCOVFLWFpEcTNjbzNGTFl3dmtON3R3PQ=="
+            ]
+            let url = Urls.FARMDETAILS
+            print(url)
+            let param = ["farmerId":6] as! [String:Any]
+            Alamofire.request(url, method:.post, parameters: param, encoding: JSONEncoding.default, headers: headers).responseJSON { response in
+                switch response.result {
+                    
+                case .success:
+                    print("response.result.value = \(response.result.value!)")
+                    let json =  JSON(response.result.value!)
+                    
+                    completion(json,nil)
+                    return
+                case .failure(let error):
+                    
+                    completion(nil,error)
+                    print(error.localizedDescription)
+                }
+            }
+        }
+    
+    
+    
+    
 }
 

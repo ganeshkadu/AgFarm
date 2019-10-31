@@ -57,6 +57,8 @@ class FarmCell: UITableViewCell , UICollectionViewDelegate, UICollectionViewData
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FarmListCell", for: indexPath as IndexPath) as! FarmListCell
+        
+        
 //        cell.cntView.layer.cornerRadius = 10
 //        cell.cntView.layer.shadowColor = UIColor.clear.cgColor
 //        cell.cntView.layer.shadowOpacity = 0.5

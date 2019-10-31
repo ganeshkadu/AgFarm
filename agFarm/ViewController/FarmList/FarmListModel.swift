@@ -11,7 +11,15 @@ import SwiftyJSON
 
 
 class FarmListModel: NSObject {
+    var status: String?
+    var message: String?
+    var result: [FarmModel]?
     
+    init(resultJson:JSON) {
+        self.status = resultJson["status"].stringValue
+        self.message = resultJson["message"].stringValue
+        self.result = [FarmModel(farmJson: resultJson["result"])]
+    }
 }
 
 
@@ -79,15 +87,16 @@ class FieldModel: NSObject{
         self.field_code = fieldJson["field_code"].stringValue
         self.crop_id = fieldJson["crop_id"].stringValue
         self.variety_type_cat_id = fieldJson["variety_type_cat_id"].stringValue
-        self.id = fieldJson["id"].stringValue
-        self.id = fieldJson["id"].stringValue
-        self.id = fieldJson["id"].stringValue
-        self.id = fieldJson["id"].stringValue
-        self.id = fieldJson["id"].stringValue
-        self.id = fieldJson["id"].stringValue
-        self.id = fieldJson["id"].stringValue
-        self.id = fieldJson["id"].stringValue
-        self.id = fieldJson["id"].stringValue
+        self.variety_type_id = fieldJson["variety_type_id"].stringValue
+        self.field_area = fieldJson["field_area"].stringValue
+        self.latitude = fieldJson["latitude"].stringValue
+        self.longitude = fieldJson["longitude"].stringValue
+        self.land_type_cat_id = fieldJson["land_type_cat_id"].stringValue
+        self.land_type_id = fieldJson["land_type_id"].stringValue
+        self.created_by = fieldJson["created_by"].stringValue
+        self.created_date = fieldJson["created_date"].stringValue
+        self.modified_by = fieldJson["modified_by"].stringValue
+        self.modified_date = fieldJson["modified_date"].stringValue
         
     }
     

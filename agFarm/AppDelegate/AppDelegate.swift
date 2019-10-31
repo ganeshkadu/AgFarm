@@ -19,6 +19,8 @@ import GooglePlaces
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
+    //Declare properties
+    var farmList : NSDictionary?
     var window: UIWindow?
     override init() {
         super.init()

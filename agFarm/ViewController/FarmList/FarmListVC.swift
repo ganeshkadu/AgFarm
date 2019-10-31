@@ -7,10 +7,12 @@
 //
 
 import UIKit
-
+import SwiftyJSON
 class FarmListVC: UIViewController , ExpandCellDelegate {
     @IBOutlet weak var tableView: UITableView!
-    
+    @IBOutlet var apiClient: APIClient!
+    var  errorMessage: String?
+    let delegate = UIApplication.shared.delegate as! AppDelegate
   
     var selectedIndex = -1
     var titleArray = ["Aprx year built", "Lot Dimensions", "SqFt Finished & Unfinished", "Total Room Count Above Grade", "Total Units", "County", "Lake/Rivers", "Waterfront/View","Aprx year built", "Lot Dimensions", "SqFt Finished & Unfinished", "Total Room Count Above Grade", "Total Units", "County", "Lake/Rivers", "Waterfront/View"]
@@ -23,6 +25,33 @@ class FarmListVC: UIViewController , ExpandCellDelegate {
         tableView.estimatedRowHeight = 70
         tableView.rowHeight = UITableView.automaticDimension
     }
+    
+    
+    override func viewWillAppear(_ animated: Bool) {
+        self.getFarmFieldData(farmerId: "6", completion: {
+            self.tableView.reloadData()
+        })
+    }
+    
+    func getFarmFieldData(farmerId: String, completion: @escaping () -> ()) {
+        apiClient.getFarmFieldList(farmerId: farmerId) { userData , error  in
+            
+            guard let userData = userData, error == nil else {
+                
+                self.errorMessage = error?.localizedDescription
+                
+                return completion()
+            }
+            
+            let data = userData["data"]["result"] as JSON
+            let farm_data = data["farm"].arrayValue
+          //  let data = userData.value(forKey: "data") as! NSDictionary
+          //  self.delegate.farmList = data.value(forKey: "result") as? NSDictionary
+            completion()
+        }
+    }
+    
+    
     @IBAction func btnBackTapped(_ sender: Any) {
         
         self.navigationController?.popViewController(animated: true)

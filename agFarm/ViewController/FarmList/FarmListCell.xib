@@ -251,6 +251,18 @@
             </constraints>
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <size key="customSize" width="338" height="502"/>
+            <connections>
+                <outlet property="lblAddressLine1" destination="U7I-vw-6Bz" id="r8j-HQ-MTb"/>
+                <outlet property="lblAddressLine2" destination="SHX-oc-aQW" id="fCy-bQ-fD5"/>
+                <outlet property="lblCountry" destination="80D-Tf-GNw" id="cNl-wH-AYm"/>
+                <outlet property="lblCounty" destination="8ka-GT-f88" id="qxW-nU-v9A"/>
+                <outlet property="lblCultivationYear" destination="uty-Ia-YEN" id="rOY-kA-qRM"/>
+                <outlet property="lblFarmCode" destination="Zyj-Qk-lu4" id="Csh-88-OMA"/>
+                <outlet property="lblState" destination="HQN-je-3Pi" id="yy9-dn-L4S"/>
+                <outlet property="lblVillage" destination="iqh-Pd-JWW" id="isW-Th-1zW"/>
+                <outlet property="lblZipcode" destination="RFo-iS-Tug" id="nOH-gz-Wvg"/>
+                <outlet property="lblseason" destination="x4T-XT-gE6" id="rHQ-9N-ppx"/>
+            </connections>
             <point key="canvasLocation" x="-452.17391304347831" y="168.75"/>
         </collectionViewCell>
     </objects>
